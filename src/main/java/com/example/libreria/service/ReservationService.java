@@ -94,6 +94,8 @@ public class ReservationService {
             );
             BigDecimal lateFee = calculateLateFee(reservation.getBook().getPrice(), daysLate);
             reservation.setLateFee(lateFee);
+        } else {
+            reservation.setLateFee(null);
         }
 
         // Actualizar el estado de la reserva
@@ -172,4 +174,3 @@ public class ReservationService {
         return dto;
     }
 }
-
