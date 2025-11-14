@@ -1,1 +1,50 @@
-# // TODO: Implementar el docker-compose
+version: '3.8'
+
+services:
+  libreria-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: libreria-app
+    ports:
+      - "8080:8080"
+    environment:
+      # Spring Boot configuration
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/libreria_db
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=
+      # H2 Console configuration
+      - SPRING_H2_CONSOLE_ENABLED=true
+      - SPRING_H2_CONSOLE_PATH=/h2-console
+      - SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS=true
+      # JPA configuration
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION=true
+      # External API URL
+      - EXTERNAL_API_BOOKS_URL=https://my-json-server.typicode.com/Gabriel-Arriola-UTN/libros/books
+      # Server configuration
+      - SERVER_PORT=8080
+    volumes:
+      # Persist H2 database
+      - h2_data:/data
+    networks:
+      - libreria-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/h2-console"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  h2_data:
+    driver: local
+
+networks:
+  libreria-network:
+    driver: bridge
+
